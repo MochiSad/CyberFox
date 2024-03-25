@@ -9,7 +9,13 @@ import {
     Alert
 } from 'react-native'
 
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from 'firebase/auth'
+import { 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    signOut,
+    sendEmailVerification 
+} from 'firebase/auth'
+
 import { auth } from "../../services/firebaseConnection"
 
 export function Home() {
@@ -18,8 +24,9 @@ export function Home() {
 
     async function createUser() {
         try {
-            await createUserWithEmailAndPassword(auth, email, password);
-            Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            await sendEmailVerification(userCredential.user);
+            Alert.alert('Sucesso', 'Cadastro realizado com sucesso! Verifique seu e-mail para confirmar o registro.');
         } catch (error) {
             Alert.alert('Erro', error.message);
         }
@@ -27,8 +34,15 @@ export function Home() {
 
     async function login() {
         try {
-            await signInWithEmailAndPassword(auth, email, password);
-            Alert.alert('Sucesso', 'Login realizado com sucesso!');
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            
+            if (user.emailVerified) {
+                Alert.alert('Sucesso', 'Login realizado com sucesso!');
+            } else {
+                await signOut(auth);
+                Alert.alert('Erro', 'Por favor, verifique seu e-mail para fazer login.');
+            }
         } catch (error) {
             Alert.alert('Erro', error.message);
         }
@@ -36,8 +50,13 @@ export function Home() {
 
     async function logout() {
         try {
-            await signOut(auth);
-            Alert.alert('Sucesso', 'Logout realizado com sucesso!');
+            const user = auth.currentUser;
+            if (user) {
+                await signOut(auth);
+                Alert.alert('Sucesso', 'Logout realizado com sucesso!');
+            } else {
+                Alert.alert('Erro', 'Nenhum usuário está logado.');
+            }
         } catch (error) {
             Alert.alert('Erro', error.message);
         }
