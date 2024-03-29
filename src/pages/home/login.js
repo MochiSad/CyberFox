@@ -1,22 +1,30 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth } from './authContext'; // Importe o hook useAuth
 import { auth } from "../../services/firebaseConnection";
 
 export function Login({ navigation }) {
+    const { login } = useAuth(); // Use o hook useAuth para acessar o contexto de autenticação
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    async function login() {
+    async function handleLogin() { // Renomeie a função para evitar conflito com o nome do estado
         try {
-            const userCredential = await signInWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
+            await login(email, password); // Use a função de login fornecida pelo contexto
+        } catch (error) {
+            Alert.alert('Error', error.message);
+        }
+    }
 
+    async function handleLoginCheckEmail() {
+        try {
+            await handleLogin();
+            const user = auth.currentUser;
             if (user.emailVerified) {
-                Alert.alert('Sucesso', 'Login efetuado com sucesso!');
+                Alert.alert('Success', 'Login successful!');
                 navigation.navigate('logout'); // Navega para a tela de logout após o login
             } else {
-                Alert.alert('Erro', 'Por favor, verifique seu e-mail para fazer login.');
+                Alert.alert('Error', 'Please verify your email to login.');
             }
         } catch (error) {
             Alert.alert('Error', error.message);
@@ -43,7 +51,7 @@ export function Login({ navigation }) {
             />
             <Button 
                 title="Login"
-                onPress={login}
+                onPress={handleLoginCheckEmail} // Use a função de login atualizada
             />
         </View>
     );

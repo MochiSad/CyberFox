@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { useAuth } from './authContext';
 import { auth } from "../../services/firebaseConnection";
 
 export function Register({ navigation }) {
@@ -17,6 +18,11 @@ export function Register({ navigation }) {
             Alert.alert('Error', error.message);
         }
     }
+    const redirectToLogin = () => {
+        navigation.navigate('login'); // Redireciona para a tela de login
+    };
+    
+
 
     return (
         <View style={styles.container}>
@@ -39,6 +45,10 @@ export function Register({ navigation }) {
             <Button 
                 title="Register"
                 onPress={createUser}
+            />
+            <Button 
+                title="Vá para o Login"
+                onPress={redirectToLogin}
             />
         </View>
     );
