@@ -1,35 +1,34 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet, Alert } from 'react-native';
-import { useAuth } from './authContext';
+import { signOut } from 'firebase/auth';
 import { auth } from "../../services/firebaseConnection";
 
-export function Logout() {
-  const { isLoggedIn, logout } = useAuth();
-
-  const handleLogout = () => {
-    if (isLoggedIn) {
-      logout();
-      Alert.alert('Sucesso', 'Deslogou com sucesso!');
-    } else {
-      Alert.alert('Erro', 'Você não está logado.');
+export function Logout({navigation}) {
+    async function logout() {
+        try {
+            await signOut(auth);
+            Alert.alert('Success', 'Logout efetuado com sucesso!');
+            navigation.navigate('login');
+        } catch (error) {
+            Alert.alert('Error', error.message);
+        }
     }
-  };
 
-  return (
-    <View style={styles.container}>
-      <Text>Firebase App - Logout</Text>
-      <Button 
-        title="Logout"
-        onPress={handleLogout}
-      />
-    </View>
-  );
+    return (
+        <View style={styles.container}>
+            <Text>Firebase App - Logout</Text>
+            <Button 
+                title="Logout"
+                onPress={logout}
+            />
+        </View>
+    );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  }
+    container: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    }
 });
